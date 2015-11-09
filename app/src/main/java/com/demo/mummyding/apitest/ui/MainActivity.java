@@ -7,6 +7,7 @@ import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.webkit.WebView;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -16,6 +17,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.demo.mummyding.apitest.R;
+import com.demo.mummyding.apitest.adapter.NewsAdapter;
 import com.demo.mummyding.apitest.model.PolicyBean;
 import com.demo.mummyding.apitest.sax.SAXParse;
 
@@ -27,6 +29,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -34,10 +37,12 @@ import javax.xml.parsers.ParserConfigurationException;
 public class MainActivity extends AppCompatActivity {
 
 
-    private TextView textView;
-    private WebView webView;
+    private ListView listView;
+    /*private TextView textView;
+    private WebView webView;*/
     private RequestQueue queue;
-    private List<PolicyBean> items;
+    private List<PolicyBean> items ;
+    private NewsAdapter adapter;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -47,15 +52,15 @@ public class MainActivity extends AppCompatActivity {
     private Handler handler = new Handler(new Handler.Callback() {
         @Override
         public boolean handleMessage(Message msg) {
-            //textView.setText((CharSequence) msg.getData().getSerializable("msg"));
-            textView.setText(items.toString());
+            adapter = new NewsAdapter(MainActivity.this,R.layout.item_news,items);
+            listView.setOnItemClickListener(adapter);
+            listView.setAdapter(adapter);
             return false;
         }
     });
     private void initData(){
         queue = Volley.newRequestQueue(this);
-        textView = (TextView) findViewById(R.id.text);
-        webView = (WebView) findViewById(R.id.webview);
+        listView = (ListView) findViewById(R.id.listnews);
         StringRequest stringRequest = new StringRequest(
                 "http://www.xinhuanet.com/politics/news_politics.xml",
                 new Response.Listener<String>() {
@@ -73,11 +78,6 @@ public class MainActivity extends AppCompatActivity {
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
-                        /*Message msg = new Message();
-                        Bundle bundle = new Bundle();
-                        bundle.putSerializable("msg",s);
-                        msg.setData(bundle);
-                        handler.dispatchMessage(msg);*/
                         handler.sendEmptyMessage(0);
                     }
                 }, new Response.ErrorListener() {
@@ -87,6 +87,5 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         queue.add(stringRequest);
-       // webView.loadUrl("http://news.xinhuanet.com/world/2015-11/07/c_128403367.htm");
     }
 }

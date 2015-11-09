@@ -18,4 +18,9 @@ public class Reg {
         }
         return s.substring(1,s.length()-1);
     }
+    public static String RegexReplaceUtil(String regex,String match,String str){
+        Pattern p = Pattern.compile(regex);
+        Matcher m = p.matcher(match);
+        return m.replaceAll(str);
+    }
 }

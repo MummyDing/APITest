@@ -14,6 +14,9 @@ public class PolicyBean {
     private String description;
     private DateBean pubTime = new DateBean();
 
+    public PolicyBean() {
+    }
+
     public String getTitle() {
         return title;
     }
@@ -39,11 +42,10 @@ public class PolicyBean {
     }
 
     public String getDescription() {
-        return description;
+        return  description ;
     }
-
     public void setDescription(String description) {
-        this.description = description;
+        this.description = Reg.RegexReplaceUtil("<[^>]+>",description,"");
     }
 
     public String getPubTime() {
