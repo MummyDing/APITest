@@ -6,6 +6,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.webkit.WebView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -18,6 +19,7 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.demo.mummyding.apitest.R;
 import com.demo.mummyding.apitest.adapter.NewsAdapter;
+import com.demo.mummyding.apitest.cache.PolicyCache;
 import com.demo.mummyding.apitest.model.PolicyBean;
 import com.demo.mummyding.apitest.sax.SAXParse;
 
@@ -41,8 +43,9 @@ public class MainActivity extends AppCompatActivity {
     /*private TextView textView;
     private WebView webView;*/
     private RequestQueue queue;
-    private List<PolicyBean> items ;
+    private  List<PolicyBean> items ;
     private NewsAdapter adapter;
+    private PolicyCache cache = new PolicyCache(this);
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -52,17 +55,29 @@ public class MainActivity extends AppCompatActivity {
     private Handler handler = new Handler(new Handler.Callback() {
         @Override
         public boolean handleMessage(Message msg) {
-            adapter = new NewsAdapter(MainActivity.this,R.layout.item_news,items);
-            listView.setOnItemClickListener(adapter);
-            listView.setAdapter(adapter);
-            return false;
+            cache.cache(items);
+            adapter.notifyDataSetChanged();
+                return false;
         }
     });
     private void initData(){
-        queue = Volley.newRequestQueue(this);
+        cache = new  PolicyCache(this);
+        items = cache.loadFromCache();
         listView = (ListView) findViewById(R.id.listnews);
+        adapter = new NewsAdapter(MainActivity.this,R.layout.item_news,items);
+        listView.setOnItemClickListener(adapter);
+        listView.setAdapter(adapter); 
+        if(items.size() == 0 ){
+            loadDataFromNet();
+        }else{
+            Log.d("size",items.size()+"");
+        }
+    }
+    private void loadDataFromNet(){
+        Log.d("net","new is working");
+        queue = Volley.newRequestQueue(this);
         StringRequest stringRequest = new StringRequest(
-                "http://www.xinhuanet.com/politics/news_politics.xml",
+                "http://www.xinhuanet.com/local/news_province.xml",
                 new Response.Listener<String>() {
                     @TargetApi(Build.VERSION_CODES.KITKAT)
                     @Override
@@ -70,7 +85,7 @@ public class MainActivity extends AppCompatActivity {
                         InputStream is =
                                 new ByteArrayInputStream(s.getBytes(StandardCharsets.ISO_8859_1));
                         try {
-                            items =  SAXParse.parse(is);
+                            items.addAll(SAXParse.parse(is));
                         } catch (ParserConfigurationException e) {
                             e.printStackTrace();
                         } catch (SAXException e) {

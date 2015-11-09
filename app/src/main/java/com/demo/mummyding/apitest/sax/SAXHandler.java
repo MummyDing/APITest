@@ -36,7 +36,7 @@ public class SAXHandler extends DefaultHandler{
                 isFirst = false;
             }
         }else if(qName.equalsIgnoreCase("description")){
-            tmpBean.setPubTime(tmpVal.toString());
+            tmpBean.setPubTime(tmpVal.toString(),false);
             tmpVal = new StringBuffer();
         }
     }

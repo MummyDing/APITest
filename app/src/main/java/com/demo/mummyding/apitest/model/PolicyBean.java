@@ -12,7 +12,7 @@ public class PolicyBean {
     private String author;
     private String link;
     private String description;
-    private DateBean pubTime = new DateBean();
+    private String pubTime ;
 
     public PolicyBean() {
     }
@@ -52,13 +52,25 @@ public class PolicyBean {
         return pubTime.toString();
     }
 
-    public void setPubTime(String pubTime) {
-        this.pubTime.setDay(Integer.parseInt(Reg.RegexUtil(",.{1,2}-", pubTime)));//Reg.RegexUtil(",.{1,2}-", pubTime)));
+    public void setPubTime(String pubTime,boolean isFromat) {
+        if(isFromat) this.pubTime = pubTime;
+        else this.pubTime = format(pubTime);
+       /* this.pubTime.setDay(Integer.parseInt(Reg.RegexUtil(",.{1,2}-", pubTime)));//Reg.RegexUtil(",.{1,2}-", pubTime)));
         this.pubTime.setMonth(Reg.RegexUtil("-.{3}-", pubTime));
         this.pubTime.setYear(Integer.valueOf(Reg.RegexUtil("-.{4} ", pubTime)).intValue());
         this.pubTime.setHour(Integer.parseInt(Reg.RegexUtil(" .{2}:", pubTime)));
         this.pubTime.setMinute(Integer.parseInt(Reg.RegexUtil(":.{2}:", pubTime)));
-        this.pubTime.setSecond(Integer.parseInt(Reg.RegexUtil(":.{2} ", pubTime)));
+        this.pubTime.setSecond(Integer.parseInt(Reg.RegexUtil(":.{2} ", pubTime)));*/
+    }
+    private String format(String pubTime){
+
+        String date = Reg.RegexUtil("-.{4} ", pubTime)+"年"+
+                Reg.RegexUtil("-.{3}-", pubTime)+"月"+
+                Reg.RegexUtil(",.{1,2}-", pubTime)+"日"+
+                Reg.RegexUtil(" .{2}:", pubTime)+"点"+
+                Reg.RegexUtil(":.{2}:", pubTime)+"分"+
+                Reg.RegexUtil(":.{2} ", pubTime)+"秒";
+        return date;
     }
 
     @Override

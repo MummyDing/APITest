@@ -12,7 +12,7 @@ public class Reg {
     public static String RegexUtil(String regex,String match){
         Pattern p = Pattern.compile(regex);
         Matcher m = p.matcher(match);
-        String s = null;
+        String s = match;
         while(m.find()){
             s = m.group();
         }
