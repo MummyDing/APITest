@@ -22,6 +22,7 @@ import com.demo.mummyding.apitest.adapter.NewsAdapter;
 import com.demo.mummyding.apitest.cache.PolicyCache;
 import com.demo.mummyding.apitest.model.PolicyBean;
 import com.demo.mummyding.apitest.sax.SAXParse;
+import com.yalantis.phoenix.PullToRefreshView;
 
 import org.xml.sax.SAXException;
 
@@ -32,18 +33,18 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import javax.xml.parsers.ParserConfigurationException;
-
 public class MainActivity extends AppCompatActivity {
 
-
     private ListView listView;
+    private PullToRefreshView refreshView;
     /*private TextView textView;
     private WebView webView;*/
     private RequestQueue queue;
-    private  List<PolicyBean> items ;
+    private  List<PolicyBean> items = new ArrayList<>();
     private NewsAdapter adapter;
     private PolicyCache cache = new PolicyCache(this);
     @Override
@@ -64,14 +65,27 @@ public class MainActivity extends AppCompatActivity {
         cache = new  PolicyCache(this);
         items = cache.loadFromCache();
         listView = (ListView) findViewById(R.id.listnews);
+         refreshView = (PullToRefreshView) findViewById(R.id.pull_to_refresh);
         adapter = new NewsAdapter(MainActivity.this,R.layout.item_news,items);
         listView.setOnItemClickListener(adapter);
-        listView.setAdapter(adapter); 
+        listView.setAdapter(adapter);
         if(items.size() == 0 ){
             loadDataFromNet();
         }else{
             Log.d("size",items.size()+"");
         }
+        refreshView.setOnRefreshListener(new PullToRefreshView.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                refreshView.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        loadDataFromNet();
+                        refreshView.setRefreshing(false);
+                    }
+                });
+            }
+        });
     }
     private void loadDataFromNet(){
         Log.d("net","new is working");
@@ -82,9 +96,11 @@ public class MainActivity extends AppCompatActivity {
                     @TargetApi(Build.VERSION_CODES.KITKAT)
                     @Override
                     public void onResponse(String s) {
+                        Log.d("respon","res");
                         InputStream is =
                                 new ByteArrayInputStream(s.getBytes(StandardCharsets.ISO_8859_1));
                         try {
+                            items.clear();
                             items.addAll(SAXParse.parse(is));
                         } catch (ParserConfigurationException e) {
                             e.printStackTrace();
@@ -98,9 +114,12 @@ public class MainActivity extends AppCompatActivity {
                 }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError volleyError) {
-                Toast.makeText(MainActivity.this,"error",Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this,"网络异常",Toast.LENGTH_SHORT).show();
+            //    Log.d("respon", "errror");
             }
         });
+        stringRequest.setShouldCache(false);
         queue.add(stringRequest);
+        Log.d("end", "end");
     }
 }
