@@ -5,4 +5,5 @@ package com.demo.mummyding.apitest.cache;
  */
 public class CONSTANT {
     public static final String DROP_TABLE = "drop table if exists ";
+    public static final String APP_CACAHE_DIRNAME ="/cache";
 }

@@ -41,8 +41,6 @@ public class MainActivity extends AppCompatActivity {
 
     private ListView listView;
     private PullToRefreshView refreshView;
-    /*private TextView textView;
-    private WebView webView;*/
     private RequestQueue queue;
     private  List<PolicyBean> items = new ArrayList<>();
     private NewsAdapter adapter;
@@ -56,9 +54,10 @@ public class MainActivity extends AppCompatActivity {
     private Handler handler = new Handler(new Handler.Callback() {
         @Override
         public boolean handleMessage(Message msg) {
+            Log.d("handle","cache"+items.size());
             cache.cache(items);
             adapter.notifyDataSetChanged();
-                return false;
+            return false;
         }
     });
     private void initData(){
@@ -81,14 +80,12 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void run() {
                         loadDataFromNet();
-                        refreshView.setRefreshing(false);
                     }
                 });
             }
         });
     }
     private void loadDataFromNet(){
-        Log.d("net","new is working");
         queue = Volley.newRequestQueue(this);
         StringRequest stringRequest = new StringRequest(
                 "http://www.xinhuanet.com/local/news_province.xml",
@@ -96,7 +93,6 @@ public class MainActivity extends AppCompatActivity {
                     @TargetApi(Build.VERSION_CODES.KITKAT)
                     @Override
                     public void onResponse(String s) {
-                        Log.d("respon","res");
                         InputStream is =
                                 new ByteArrayInputStream(s.getBytes(StandardCharsets.ISO_8859_1));
                         try {
@@ -110,16 +106,16 @@ public class MainActivity extends AppCompatActivity {
                             e.printStackTrace();
                         }
                         handler.sendEmptyMessage(0);
+                        refreshView.setRefreshing(false);
                     }
                 }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError volleyError) {
                 Toast.makeText(MainActivity.this,"网络异常",Toast.LENGTH_SHORT).show();
-            //    Log.d("respon", "errror");
+                refreshView.setRefreshing(false);
             }
         });
         stringRequest.setShouldCache(false);
         queue.add(stringRequest);
-        Log.d("end", "end");
     }
 }

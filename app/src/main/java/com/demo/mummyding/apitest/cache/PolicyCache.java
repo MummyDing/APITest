@@ -6,10 +6,12 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
+import android.webkit.WebView;
 
 import com.demo.mummyding.apitest.cache.tables.PolicyTable;
 import com.demo.mummyding.apitest.model.PolicyBean;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,6 +29,8 @@ public class PolicyCache {
         mHelper = DataBaseHelper.instance(context);
     }
     public  void cache(List<PolicyBean> list) {
+        WebView wb = new WebView(mContext);
+        wb.clearCache(true);
         SQLiteDatabase db = mHelper.getWritableDatabase();
         db.beginTransaction();
         db.execSQL(CONSTANT.DROP_TABLE + PolicyTable.NAME);
